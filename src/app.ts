@@ -1,6 +1,7 @@
 import express, { Request, Response, json } from "express";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import httpStatus from "http-status";
+import { sessionsRouter } from "./routers/sessions.router"
 import "express-async-errors";
 import cors from 'cors';
 
@@ -9,6 +10,7 @@ const app = express();
 app.use(json());
 app.use(cors())
 
+app.use(sessionsRouter);
 
 // rota health
 app.get("/health", (req: Request, res: Response) => {
