@@ -43,3 +43,13 @@ export async function deleteUser(id: number) {
 
     return user
 }
+
+export async function checkUserEmail(email: string) {
+    let users = await prisma.users.findMany({
+        where: {
+            email
+        }
+    });
+
+    return users
+}

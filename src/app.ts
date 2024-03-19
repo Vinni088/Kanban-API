@@ -1,15 +1,16 @@
 import express, { Request, Response, json } from "express";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import httpStatus from "http-status";
-import { sessionsRouter } from "./routers/sessions.router"
 import "express-async-errors";
 import cors from 'cors';
+import { sessionsRouter } from "./routers/sessions.router";
 
 // configs iniciais:
 const app = express();
 app.use(json());
 app.use(cors())
 
+// routers usados
 app.use(sessionsRouter);
 
 // rota health
