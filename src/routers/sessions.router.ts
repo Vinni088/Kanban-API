@@ -5,7 +5,11 @@ import * as sessionsController from "../controllers/sessions.controller"
 
 const sessionsRouter = Router();
 
-sessionsRouter.post('/sign_up', validateSchema(createUserSchema), sessionsController.signUpController);
+sessionsRouter.post('/user', validateSchema(createUserSchema), sessionsController.postUserController);
+
+sessionsRouter.put('/user/:id', validateSchema(createUserSchema), sessionsController.updateUserController);
+
+sessionsRouter.delete('/user/:id', sessionsController.deleteUserController);
 
 sessionsRouter.post('/sign_in', validateSchema(loginSchema), sessionsController.signInController);
 

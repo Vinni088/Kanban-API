@@ -36,6 +36,12 @@ export async function updateUser(id: number, name: string, email: string, passwo
 };
 
 export async function deleteUser(id: number) {
+    await prisma.sessions.deleteMany({
+        where: {
+            user_id: id
+        }
+    });
+
     let user = await prisma.users.delete({
         where: {
             id
@@ -54,6 +60,16 @@ export async function checkUserEmail(email: string) {
         },
         include: {
             sessions: true
+        }
+    });
+
+    return users
+};
+
+export async function checkUserId(id: number) {
+    let users = await prisma.users.findMany({
+        where: {
+            id
         }
     });
 

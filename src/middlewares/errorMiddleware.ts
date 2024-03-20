@@ -5,13 +5,9 @@ import { ApplicationError } from "../protocols/index.protocol"
 export default function errorHandler(error: ApplicationError, req: Request, res: Response, next: NextFunction) {
 
     switch (error.type) {
-        case "email_ja_cadastrado":
+        case "unprocessable_entity":
             return res.status(httpStatus.UNPROCESSABLE_ENTITY).send(error.message);
-        case "email_nao_cadastrado":
-            return res.status(httpStatus.UNAUTHORIZED).send(error.message);
-        case "senha_incorreta":
-            return res.status(httpStatus.UNAUTHORIZED).send(error.message);
-        case "token_invalido":
+        case "unauthorized":
             return res.status(httpStatus.UNAUTHORIZED).send(error.message);
         default:
             console.log(error)

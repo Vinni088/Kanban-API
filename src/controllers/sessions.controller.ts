@@ -6,16 +6,16 @@ import bcrypt from "bcrypt";
 
 const log = console.log;
 
-export async function signUpController(req: Request, res: Response) {
+export async function postUserController(req: Request, res: Response) {
     const { name, email, password } = req.body;
 
     const hash: string = bcrypt.hashSync(password, 10);
 
-    let check = await sessionsRepository.checkUserEmail(email);
+    let checkUser = await sessionsRepository.checkUserEmail(email);
 
-    if (check.length > 0) {
-        log("Check length > 0")
-        throw ({ type: 'email_ja_cadastrado', message: 'O email informado já pertence à uma conta.' })
+    if (checkUser.length > 0) {
+        log("Pre existing user found")
+        throw ({ type: 'unprocessable_entity', message: 'O email informado já pertence à uma conta.' })
     }
 
     let user = await sessionsRepository.createUser(name, email, hash);
@@ -23,34 +23,78 @@ export async function signUpController(req: Request, res: Response) {
     return res.status(httpStatus.OK).send(user);
 }
 
+export async function updateUserController(req: Request, res: Response) {
+    const { name, email, password } = req.body;
+    const { id } = req.params;
+
+    let numberId = Number(id);
+
+    if (isNaN(numberId)) {
+        return res.status(httpStatus.UNPROCESSABLE_ENTITY).send("Id não numerico enviado");
+    }
+
+    let checkUser = await sessionsRepository.checkUserId(numberId);
+
+    if (checkUser.length === 0) {
+        log("No user found")
+        throw ({ type: 'unauthorized', message: 'O Id informado não pertence à uma conta.' })
+    }
+
+    const hash: string = bcrypt.hashSync(password, 10);
+
+    await sessionsRepository.updateUser(numberId, name, email, hash);
+
+    return res.status(httpStatus.ACCEPTED).send("Informações da conta atualizadas.");
+}
+
+export async function deleteUserController(req: Request, res: Response) {
+    const { id } = req.params;
+    let numberId = Number(id);
+
+    if (isNaN(numberId)) {
+        return res.status(httpStatus.UNPROCESSABLE_ENTITY).send("Id não numerico enviado");
+    }
+
+    let checkUser = await sessionsRepository.checkUserId(numberId);
+
+    if (checkUser.length === 0) {
+        log("No user found");
+        throw ({ type: 'unauthorized', message: 'O email informado não pertence à uma conta.' });
+    }
+
+    await sessionsRepository.deleteUser(numberId);
+
+    return res.status(httpStatus.ACCEPTED).send("Usuario deletado");
+}
+
 export async function signInController(req: Request, res: Response) {
     const { email, password } = req.body;
 
-    let userCheck = await sessionsRepository.checkUserEmail(email);
+    let checkUser = await sessionsRepository.checkUserEmail(email);
 
-    if (userCheck.length === 0) {
-        log("Email não atrelado à um user")
-        throw ({ type: 'email_nao_cadastrado', message: 'O email informado não pertence à uma conta.' })
+    if (checkUser.length === 0) {
+        log("No user found");
+        throw ({ type: 'unauthorized', message: 'O email informado não pertence à uma conta.' })
     }
 
-    let user = userCheck[0];
+    let user = checkUser[0];
 
-    const passwordCheck: boolean = bcrypt.compareSync(password, user.password);
+    const checkPassword: boolean = bcrypt.compareSync(password, user.password);
 
-    if (!passwordCheck) {
-        log("Senha incorreta")
-        throw ({ type: 'senha_incorreta', message: 'A senha enviada está incorreta' })
+    if (!checkPassword) {
+        log("Wrong password");
+        throw ({ type: 'unauthorized', message: 'A senha enviada está incorreta' });
     }
 
     let session: { id: number, user_id: number, token: string };
-    
+
     if (user.sessions.length === 0) {
-        let token: string = tokenGeneretor()
+        let token: string = tokenGeneretor();
         session = await sessionsRepository.createSession(user.id, token);
     } else {
-        let newToken: string = tokenGeneretor()
+        let newToken: string = tokenGeneretor();
         await sessionsRepository.updateSession(user.id, newToken);
-        session = await sessionsRepository.readSessionById(user.id)
+        session = await sessionsRepository.readSessionById(user.id);
     }
 
     log(session);
@@ -64,8 +108,8 @@ export async function userInfoController(req: Request, res: Response) {
     let userInfo = await sessionsRepository.readUserInfoByToken(token);
 
     if (userInfo === null) {
-        log("Token inválido");
-        throw ({ type: 'token_invalido', message: 'Token inválido' })
+        log("Invalid Token");
+        throw ({ type: 'unauthorized', message: 'Token inválido' })
     }
 
     return res.status(httpStatus.OK).send(userInfo);
