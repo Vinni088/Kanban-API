@@ -3,16 +3,24 @@ import httpStatus from "http-status";
 import { Request, Response, NextFunction } from "express";
 
 export function validateSchema(schema: ObjectSchema) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const validation = schema.validate(req.body, { abortEarly: false });
+	return (req: Request, res: Response, next: NextFunction) => {
+		const validation = schema.validate(req.body, { abortEarly: false });
 
-    if (validation.error) {
+		if (validation.error) {
 
-      return res.status(httpStatus.UNPROCESSABLE_ENTITY).send({
-        explanation: "O objeto enviado está incorreto, por favor consulte a documentação"
-      })
-    }
+			let errorDetails: string[] = validation.error.details.map(x => {
+				let field = x.message.split(`"`)[1]
+				return field;
+			})
 
-    next();
-  }
+			let errorString: string = errorDetails.join(", ")
+
+			return res.status(httpStatus.UNPROCESSABLE_ENTITY).send({
+				message: "O objeto enviado está incorreto, por favor consulte a documentação",
+				hint: `Campo(s) incorreto(s): ${errorString}`
+			})
+		}
+
+		next();
+	}
 }
