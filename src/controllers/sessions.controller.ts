@@ -59,7 +59,14 @@ export async function signInController(req: Request, res: Response) {
 }
 
 export async function userInfoController(req: Request, res: Response) {
-    const { } = req.body;
+    const { token } = req.body;
 
-    return res.status(httpStatus.OK).send("Ok: user info");
+    let userInfo = await sessionsRepository.readUserInfoByToken(token);
+
+    if (userInfo === null) {
+        log("Token inválido");
+        throw ({ type: 'token_invalido', message: 'Token inválido' })
+    }
+
+    return res.status(httpStatus.OK).send(userInfo);
 }

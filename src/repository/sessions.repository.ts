@@ -1,6 +1,5 @@
 import prisma from "../database"
 
-
 ////////////////////////////////////// CRUD: Users //////////////////////////////////////
 export async function createUser(name: string, email: string, password: string) {
     let user = await prisma.users.create({
@@ -12,13 +11,13 @@ export async function createUser(name: string, email: string, password: string) 
     })
 
     return user
-}
+};
 
 export async function readUsers() {
     let users = await prisma.users.findMany();
 
     return users
-}
+};
 
 export async function updateUser(id: number, name: string, email: string, password: string) {
     let user = await prisma.users.update({
@@ -34,7 +33,7 @@ export async function updateUser(id: number, name: string, email: string, passwo
     })
 
     return user
-}
+};
 
 export async function deleteUser(id: number) {
     let user = await prisma.users.delete({
@@ -44,7 +43,7 @@ export async function deleteUser(id: number) {
     })
 
     return user
-}
+};
 
 ////////////////////////////////////// Checks: Users //////////////////////////////////////
 
@@ -59,7 +58,27 @@ export async function checkUserEmail(email: string) {
     });
 
     return users
-}
+};
+
+export async function readUserInfoByToken(token: string) {
+    let userInfo = await prisma.users.findFirst({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            sessions: true
+        },
+        where: {
+            sessions: {
+                every: {
+                    token
+                }
+            }
+        }
+    })
+
+    return userInfo
+};
 
 ////////////////////////////////////// CRUD: Sessions  //////////////////////////////////////
 
@@ -72,13 +91,13 @@ export async function createSession(user_id: number, token: string) {
     })
 
     return session
-}
+};
 
 export async function readSessions() {
     let sessions = await prisma.sessions.findMany();
 
     return sessions
-}
+};
 
 export async function updateSession(user_id: number, token: string) {
     let newSession = await prisma.sessions.updateMany({
@@ -91,7 +110,7 @@ export async function updateSession(user_id: number, token: string) {
     })
 
     return newSession
-}
+};
 
 export async function deleteSession(user_id: number) {
     let deletedSession = await prisma.sessions.deleteMany({
@@ -101,7 +120,7 @@ export async function deleteSession(user_id: number) {
     })
 
     return deletedSession
-}
+};
 
 ////////////////////////////////////// Checks: Sessions //////////////////////////////////////
 
@@ -113,21 +132,4 @@ export async function readSessionById(user_id: number) {
     });
 
     return session
-}
-
-export async function readUserInfoByToken(token: string) {
-    let userInfo = await prisma.users.findFirst({
-        where: {
-            sessions: {
-                every: {
-                    token
-                }
-            }
-        },
-        include: {
-            sessions: true
-        }
-    })
-
-    return userInfo
-}
+};

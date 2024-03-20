@@ -11,6 +11,8 @@ export default function errorHandler(error: ApplicationError, req: Request, res:
             return res.status(httpStatus.UNAUTHORIZED).send(error.message);
         case "senha_incorreta":
             return res.status(httpStatus.UNAUTHORIZED).send(error.message);
+        case "token_invalido":
+            return res.status(httpStatus.UNAUTHORIZED).send(error.message);
         default:
             console.log(error)
             res.status(httpStatus.INTERNAL_SERVER_ERROR).send("Sorry, something went wrong 😢");
