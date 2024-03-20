@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import "express-async-errors";
 import cors from 'cors';
 import { sessionsRouter } from "./routers/sessions.router";
+import { tasksRouter } from "./routers/tasks.router";
 
 // configs iniciais:
 const app = express();
@@ -12,6 +13,7 @@ app.use(cors())
 
 // routers usados
 app.use(sessionsRouter);
+app.use(tasksRouter);
 
 // rota health
 app.get("/health", (req: Request, res: Response) => {
